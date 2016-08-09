@@ -25,3 +25,14 @@ in which:
   * The last *space-separated* part of each log line is considered as the *message*. The message may contain character `&` to denote standard HTTP query parameters.
   * All the log line elements in between, including `LEVEL` or others, are ignored.
 
+
+## Requirements
+
+* logreplay should be compatible with Python 2.7+.
+* You need to have Python [requests][1] package:
+```bash
+$ sudo apt-get install python-pip
+$ (sudo) pip install requests
+```
+
+[1]: https://pypi.python.org/pypi/requests
