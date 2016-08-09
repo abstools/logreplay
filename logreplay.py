@@ -35,7 +35,7 @@ def send_queries(logs, url, query_path):
 		params = logs[log_time]
 		status_code = send_query(params, url, query_path)
 		if status_code != 200:
-			logging.error("Request failed: %s -> %s", response.status_code, params)
+			logging.error("Request failed: %s -> %s", status_code, params)
 		else:
 			logging.info("200 %s", params)
 		if (len(delays) > 0):
