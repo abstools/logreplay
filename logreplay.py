@@ -44,7 +44,8 @@ def send_queries(logs, url, query_path):
 			time.sleep(delay / 1000.0)
 
 def send_query(query, url = "http://httpbin.org", path = "/get"):
-	response = requests.get(url + path, data = query)
+	response = requests.get(url + path, params = query)
+	logging.debug("Completed: %s", response.url)
 	return response.status_code
 
 def build_delays(times):
