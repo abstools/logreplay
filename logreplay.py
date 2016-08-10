@@ -61,7 +61,7 @@ def build_delays(times):
 
 if __name__ == "__main__":
 	if (len(sys.argv) < 5):
-		print "Usage: parse.py LOG_FILE TARGET_PARAMS EXTRA_PARAMS URL QUERY_PATH"
+		print "Usage: logreplay.py LOG_FILE TARGET_PARAMS EXTRA_PARAMS URL QUERY_PATH"
 		sys.exit(1)
 
 	log_file = sys.argv[1]
