@@ -1,7 +1,9 @@
 #!/usr/bin/python
 
+from custom_filters import *
 from datetime import datetime
 import logging
+import os
 import re
 import requests
 import sys
@@ -24,8 +26,13 @@ def filter_logs(logs, target_params, extra_params):
 	for k, v in logs.iteritems():
 		# val can be 'id&' or 'id=xxx&'
 		filtered_values = [val for val in v.split("&") if val in target_params or val[:val.index('=')] in target_params]
-		filtered_logs[k] = "&".join(filtered_values + extra_params)
+		values = apply_custom_filters(filtered_values)
+		filtered_logs[k] = "&".join(values + extra_params)
 	return filtered_logs
+
+def apply_custom_filters(values):
+	filtered_values = [apply_filter(v) for v in values]
+	return filtered_values
 
 def send_queries(logs, url, query_path):
 	times = sorted(list(logs.keys()))
