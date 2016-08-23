@@ -3,7 +3,7 @@ The Python script file that contains all
 custom filter functions.
 """
 
-def apply_filter(value):
+def identity_filter(value):
     """A do-nothing custom filter that returns
 	the value of the input as-is.
 
@@ -11,25 +11,25 @@ def apply_filter(value):
 	"""
     return value
 
-# def apply_filter(value):
-# 	"""A custom filter that converts a double value
-# 	to an integer value.
+# def proctime_filter(value):
+#     """An example filter that converts a proctime attribute
+#     in seconds (of type float) to milliseconds (integer).
 
-# 	value -- the value to filter that can be as 'key=value'
-# 	"""
-# 	key = ""
-# 	val = value
-# 	idx = value.index('=')
-# 	is_key_value = idx > 0
-# 	if is_key_value:
-# 		key = value[:idx]
-# 		val = value[idx + 1:]
-# 	try:
-# 		v = float(val)
-# 		final_val = str(int(v) + 1)
-# 		final_key_value = key + "=" + final_val if is_key_value else final_val
-# 		logging.debug("%s -> %s", value , final_key_value)
-# 		return final_key_value
-# 	except:
-# 		# Ignore everything, just return the original value
-# 		return value
+#     value -- the 'proctime=val' pair whose val component is transformed 
+#     """
+#     key = "proctime"
+#     try:
+#         idx = value.index(key + '=')
+#         val = float(value[idx + len(key) + 1:])
+#         new_val = str(int(val*1000))
+#         final_key_value = key + "=" + new_val
+#         return final_key_value
+#     except:
+#         # Ignore everything, just return the original value
+#         return value
+
+def get_filters():
+    """The list of filter functions to apply on a value."""
+
+    return [identity_filter]
+#     return [proctime_filter, identity_filter]

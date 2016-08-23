@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-A log reply tool
+A log replay tool
 """
 
 from datetime import datetime
@@ -8,7 +8,7 @@ import logging
 import sys
 import time
 import requests
-from custom_filters import *
+from custom_filters import get_filters
 
 
 def load_log(log_file):
@@ -54,6 +54,18 @@ def apply_custom_filters(values):
     """
     filtered_values = [apply_filter(v) for v in values]
     return filtered_values
+
+
+def apply_filter(value):
+    """Apply all filters registered in
+	get_filters() to the value.
+
+	value -- the value to be filtered
+	"""
+    enabled_filters = get_filters()
+    for filt in enabled_filters:
+        value = filt(value)
+    return value
 
 
 def send_queries(logs, url, query_path):
