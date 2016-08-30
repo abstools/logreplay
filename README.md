@@ -1,6 +1,6 @@
 # logreplay
 
-An experimental research tool to replay a log file as a series of queries onto an RESTful endpoint with a lot of assumptions and conventions.
+An experimental research tool to replay a log file as a series of queries onto an RESTful endpoint.
 
 To run the tool:
 
@@ -25,7 +25,6 @@ in which:
   * The last *space-separated* part of each log line is considered as the *message*. The message may contain character `&` to denote standard HTTP query parameters.
   * All the log line elements in between, including `LEVEL` or others, are ignored.
 
-
 ## Requirements
 
 * logreplay should be compatible with Python 2.7+.
@@ -34,5 +33,17 @@ in which:
 $ sudo apt-get install python-pip
 $ (sudo) pip install requests
 ```
+
+
+## Parameter value transformations
+Before logreplay fires a request to the HTTP endpoint, it is (optionally)
+possible to apply transformations on selected attributes.
+To use this, implement your own transformation function in the file
+custom_filters.py and enable the filter by adding the function name
+to the list of activated filters returned by the get_filters function
+in the same file.
+
+* The file example/custom_filters.py shows an example transformation,
+to apply on the proctime attribute in the example/example.log log file.
 
 [1]: https://pypi.python.org/pypi/requests
