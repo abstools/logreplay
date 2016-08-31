@@ -44,7 +44,7 @@ To use this, implement your own transformation function in the file
 to the list of activated filters returned by the `get_filters` function
 in the same file.
 
-* The file `example/custom_filters.py` shows an example transformation,
+The file `example/custom_filters.py` shows an example transformation,
 to apply on the `proctime` attribute in the `example/example.log` log file.
 
 [1]: https://pypi.python.org/pypi/requests
