@@ -36,14 +36,15 @@ $ (sudo) pip install requests
 
 
 ## Parameter value transformations
+
 Before logreplay fires a request to the HTTP endpoint, it is (optionally)
 possible to apply transformations on selected attributes.
 To use this, implement your own transformation function in the file
-custom_filters.py and enable the filter by adding the function name
-to the list of activated filters returned by the get_filters function
+`custom_filters.py` and enable the filter by adding the function name
+to the list of activated filters returned by the `get_filters` function
 in the same file.
 
-* The file example/custom_filters.py shows an example transformation,
-to apply on the proctime attribute in the example/example.log log file.
+* The file `example/custom_filters.py` shows an example transformation,
+to apply on the `proctime` attribute in the `example/example.log` log file.
 
 [1]: https://pypi.python.org/pypi/requests
