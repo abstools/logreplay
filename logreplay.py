@@ -37,7 +37,7 @@ def filter_logs(logs, target_params, extra_params):
     if len(target_params) == 0:
         return logs
     filtered_logs = {}
-    for key, value in logs.iteritems():
+    for key, value in logs.items():
         # val can be 'id&' or 'id=xxx&'
         filtered_values = [val for val in value.split("&") \
          if val in target_params or val[:val.index('=')] in target_params]
@@ -68,7 +68,7 @@ def apply_filter(value):
     return value
 
 
-def send_queries(logs, url, query_path):
+def send_queries(logs, url):
     """Send logs as HTTP requests to an endpoint
 
     logs -- the dictionary of logs
@@ -80,7 +80,7 @@ def send_queries(logs, url, query_path):
     logging.info("Using delays in milliseconds: %s", delays)
     for log_time in times:
         params = logs[log_time]
-        status_code = send_query(params, url, query_path)
+        status_code = send_query(params, url)
         if status_code != 200:
             logging.error("Request failed: %s -> %s", status_code, params)
         else:
@@ -91,14 +91,13 @@ def send_queries(logs, url, query_path):
             time.sleep(delay / 1000.0)
 
 
-def send_query(query, url="http://httpbin.org", path="/get"):
+def send_query(query, url="http://httpbin.org/get"):
     """Send a single HTTP query to an endpoint
 
     query -- the query string for the HTTP request
     url -- the endpoint URL
-    path -- the endpoint prefix path
     """
-    response = requests.get(url + path, params=query)
+    response = requests.get(url, params=query)
     logging.debug("Completed: %s", response.url)
     return response.status_code
 
@@ -128,7 +127,6 @@ def main(args):
     target_params = args[2].split(",")
     extra_params = args[3].split(",")
     url = args[4]
-    query_path = args[5]
 
     logging.basicConfig(
         format='%(asctime)s %(levelname)s %(message)s', level=logging.INFO)
@@ -141,11 +139,11 @@ def main(args):
     logs = filter_logs(lines, target_params, extra_params)
     logging.info("Filtered logs. Size: %s", len(logs))
 
-    send_queries(logs, url, query_path)
+    send_queries(logs, url)
 
 if __name__ == "__main__":
     if len(sys.argv) < 5:
-        print "Usage: logreplay.py LOG_FILE TARGET_PARAMS EXTRA_PARAMS URL QUERY_PATH"
+        print("Usage: logreplay.py LOG_FILE TARGET_PARAMS EXTRA_PARAMS URL")
         sys.exit(1)
 
     main(sys.argv)
