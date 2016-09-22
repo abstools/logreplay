@@ -5,7 +5,7 @@ An experimental research tool to replay a log file as a series of queries onto a
 To run the tool:
 
 ```bash
-$ python logreplay.py /path/log-file param1,param2 extra1=1,extra2=2 URL /QueryPath
+$ python logreplay.py /path/log-file param1,param2 extra1=1,extra2=2 URL
 ```
 
 in which:
