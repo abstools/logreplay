@@ -12,14 +12,13 @@ in which:
 
 * `paramN` is the name of parameter to extract from log file
 * `extraX=Y` is an extra parameter key-value to send to the endpoint
-* `URL` is the RESTful endpoint to receive the queries extracted from the log file; e.g. `http://httpbin.org`.
-* `/QueryPath` is the endpoint receiving queries; e.g. `/get`. The sent query to the endpoint is currently hard-coded to be an HTTP `GET` request.
+* `URL` is the URL of the HTTP endpoint to send queries extracted from the log file; e.g. `http://httpbin.org/get`. Queries are currently hard-coded to be an HTTP `GET` request.
 * The log file is assumed to have the following structure on every line:
 
 ```
 DATE TIME [LEVEL EXTRA] [MESSAGE]
 ```
-in which:
+where:
 
   * `DATE TIME` are in standard Python format `%Y-%m-%d %H:%M:%S,%f`.
   * The last *space-separated* part of each log line is considered as the *message*. The message may contain character `&` to denote standard HTTP query parameters.
