@@ -1,6 +1,6 @@
 # logreplay
 
-An experimental research tool to replay a log file as a series of queries onto an RESTful endpoint.
+An tool to replay a log file as a series of queries onto an HTTP endpoint.
 
 To run the tool:
 
