@@ -4,6 +4,7 @@ A log replay tool
 """
 
 from datetime import datetime
+import argparse
 import logging
 import sys
 import time
@@ -27,22 +28,37 @@ def load_log(log_file):
     return file_lines
 
 
-def filter_logs(logs, target_params, extra_params):
+def filter_logs(logs, log_params, extra_params, delay):
     """Filter a logs dictionary based input target parameters.
 
     logs -- the input logs dictionary
-    target_params -- the interested set of input parameter keys
-    extra_params -- the list of parameters to be added input from command line
+    target_params -- the parameters to extract from the log file
+    extra_params -- the extra parameters to be added (inputted from command line)
+    delay -- add delay as an extra parameter
     """
-    if len(target_params) == 0:
+    if len(log_params) == 0:
         return logs
+
+    times = sorted(list(logs.keys()))
+    delays = build_delays(times)
+
     filtered_logs = {}
-    for key, value in logs.items():
+    for key, value in sorted(logs.items()):
         # val can be 'id&' or 'id=xxx&'
         filtered_values = [val for val in value.split("&") \
-         if val in target_params or val[:val.index('=')] in target_params]
+         if val in log_params or val[:val.index('=')] in log_params]
+        
+        if (delay and len(delays) > 0):
+            delay_val = delays.pop(0)
+            #logging.info("delay before trans: %s", delay_val)
+            delay_param = "delay=" + str(delay_val)
+            #logging.info("delay after string conv: %s", delay_param)
+            filtered_values.append(delay_param)
+
         values = apply_custom_filters(filtered_values)
+        #logging.info("delay after trans: %s", values)
         filtered_logs[key] = "&".join(values + extra_params)
+
     return filtered_logs
 
 
@@ -68,16 +84,14 @@ def apply_filter(value):
     return value
 
 
-def send_queries(logs, url):
+def send_queries(logs, url, use_delay):
     """Send logs as HTTP requests to an endpoint
 
     logs -- the dictionary of logs
-    url -- the endpoint that receives HTTP requests
-    query_path -- the HTTP query path to use for every request as prefix
+    url -- the URL of the HTTP endpoint to send requests to
     """
     times = sorted(list(logs.keys()))
     delays = build_delays(times)
-    logging.info("Using delays in milliseconds: %s", delays)
     for log_time in times:
         params = logs[log_time]
         status_code = send_query(params, url)
@@ -85,7 +99,7 @@ def send_queries(logs, url):
             logging.error("Request failed: %s -> %s", status_code, params)
         else:
             logging.info("200 %s", params)
-        if len(delays) > 0:
+        if (use_delay and len(delays) > 0):
             delay = delays.pop(0)
             logging.info("Waiting %s msec(s) for next query ...", delay)
             time.sleep(delay / 1000.0)
@@ -103,47 +117,66 @@ def send_query(query, url="http://httpbin.org/get"):
 
 
 def build_delays(times):
-    """Build a list of delays in mill-seconds from the times
-    of logs loaded from the file
+    """Build a list of delays in milli-seconds from the times
+    of each line in the log file
 
-    times -- the list of log time stamps loaded from the log file
+    times -- the list of time stamps loaded from the log file
     """
-    t_0 = times[0]
     delays = []
-    for log_t in times:
-        delta = log_t - t_0
-        delta_ms = delta.microseconds / 1000.0
+    for prev_t, cur_t in zip(times,times[1:]):
+        delta = cur_t - prev_t
+        delta_ms = delta.total_seconds() * 1000.0
         delays.append(delta_ms)
-    # First query does not wait; assert delays[0] == 0
-    delays.pop(0)
     return delays
+
+def args_parser():
+    """ Create a CLI argument parser
+    """
+    parser = argparse.ArgumentParser(prog = 'logreplay.py',
+        description = 'A tool to replay a log file onto an HTTP endpoint as a series of queries. Requires Python 3.x.')
+    parser.add_argument('log_file', metavar = 'LOG_FILE',
+        help = "The path of the log file to replay.")
+    parser.add_argument('target_params', metavar = 'TARGET_PARAMS',
+        help = "The list of attributes from each query in the log file to use in replaying.")
+    parser.add_argument('url', metavar = 'URL',
+        help = "The URL of the HTPP endpoint.")
+    parser.add_argument('--extra_params', required = False, default = '',
+        help = "Extra parameters with a fixed value, given as a comma-separated list of key=value pairs.")
+    parser.add_argument('--pass_delay', action="store_true",
+        help = "Add the delay between queries from the log as an extra query parameter.")
+    parser.add_argument('--use_delay', action="store_true",
+        help = "During replaying, use for the delay between successive queries from the log file.")
+    return parser
 
 def main(args):
     """The main function
 
-    args -- the program arguments
+    args -- the command line arguments
     """
-    log_file = args[1]
-    target_params = args[2].split(",")
-    extra_params = args[3].split(",")
-    url = args[4]
+    log_file = args.log_file
+    target_params = args.target_params.split(",")
+    url = args.url
+    extra_params = args.extra_params.split(",")
+    pass_delay = args.pass_delay
+    use_delay = args.use_delay
 
+    lines = load_log(log_file)
+    params = target_params
+    params.extend(extra_params)
+    logging.info("Loaded log file. Size: %s", len(lines))
+
+    logging.info("Selected query parameters: %s", target_params)
+    logging.info("Using extra query parameters: %s", extra_params)
+    logging.info("All parameters: %s", params)
+    logs = filter_logs(lines, target_params, extra_params, pass_delay)
+    logging.info("Filtered logs. Size: %s", len(logs))
+
+    send_queries(logs, url, use_delay)
+
+if __name__ == "__main__":
     logging.basicConfig(
         format='%(asctime)s %(levelname)s %(message)s', level=logging.INFO)
 
-    lines = load_log(log_file)
-    logging.info("Loaded log file. Size: %s", len(lines))
-
-    logging.info("Using extr query parameters: %s", extra_params)
-    logging.info("Using target query parameters: %s", target_params)
-    logs = filter_logs(lines, target_params, extra_params)
-    logging.info("Filtered logs. Size: %s", len(logs))
-
-    send_queries(logs, url)
-
-if __name__ == "__main__":
-    if len(sys.argv) < 5:
-        print("Usage: logreplay.py LOG_FILE TARGET_PARAMS EXTRA_PARAMS URL")
-        sys.exit(1)
-
-    main(sys.argv)
+    cli_parser = args_parser()
+    args = cli_parser.parse_args()
+    main(args)
