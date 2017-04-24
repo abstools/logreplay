@@ -28,7 +28,24 @@ def proctime_filter(value):
         # Ignore everything, just return the original value
         return value
 
+def delay_filter(value):
+    """An example filter that converts a delay attribute
+    in milliseconds (of type float) to milliseconds (integer).
+
+    value -- the 'delay=val' pair whose val component is transformed 
+    """
+    key = "delay"
+    try:
+        idx = value.index(key + '=')
+        val = float(value[idx + len(key) + 1:])
+        new_val = str(int(val))
+        final_key_value = key + "=" + new_val
+        return final_key_value
+    except:
+        # Ignore everything, just return the original value
+        return value
+
 def get_filters():
     """The list of filter functions to apply on a value."""
 
-    return [proctime_filter, identity_filter]
+    return [proctime_filter, delay_filter, identity_filter]
