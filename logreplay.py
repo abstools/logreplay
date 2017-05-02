@@ -9,6 +9,7 @@ import logging
 import sys
 import time
 import requests
+import threading
 from custom_filters import get_filters
 
 
@@ -94,7 +95,11 @@ def send_queries(logs, url, use_delay):
     delays = build_delays(times)
     for log_time in times:
         params = logs[log_time]
-        send_query(params, url)
+
+        # sent query in separate thread
+        t = threading.Thread(target=send_query, args=(params,url,))
+        t.start()
+
         if (use_delay and len(delays) > 0):
             delay = delays.pop(0)
             logging.info("Waiting %s msec(s) for next query ...", delay)
