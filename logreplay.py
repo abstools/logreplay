@@ -94,11 +94,7 @@ def send_queries(logs, url, use_delay):
     delays = build_delays(times)
     for log_time in times:
         params = logs[log_time]
-        status_code = send_query(params, url)
-        if status_code != 200:
-            logging.error("Request failed: %s -> %s", status_code, params)
-        else:
-            logging.info("200 %s", params)
+        send_query(params, url)
         if (use_delay and len(delays) > 0):
             delay = delays.pop(0)
             logging.info("Waiting %s msec(s) for next query ...", delay)
@@ -113,6 +109,10 @@ def send_query(query, url="http://httpbin.org/get"):
     """
     response = requests.get(url, params=query)
     logging.debug("Completed: %s", response.url)
+    if response.status_code != 200:
+        logging.error("Request failed: %s -> %s", response.status_code, query)
+    else:
+        logging.info("200 %s", query)
     return response.status_code
 
 
